@@ -8,10 +8,12 @@ import { Avatar } from '@/components/ui/Avatar';
 import { 
   Users, Shield, Crown, ChevronDown, ChevronUp, Edit, ArrowUp,
   Settings, BarChart, MessageSquare, UserCheck, AlertTriangle,
-  Search, Trophy, Zap, DollarSign, TrendingUp, Activity, BookOpen,
-  Briefcase
+  Search, Trophy, Zap, TrendingUp, Activity, BookOpen,
+  Briefcase, ArrowRight, ArrowUpCircle
 } from 'lucide-react';
-import { ROLES, RANK_LEVELS } from '@/lib/rbac';
+import { 
+  ROLES, RANK_LEVELS, getVisualConfig, ESCALATION_PATHS, CHANNELS, type UserRole
+} from '@/lib/rbac';
 import { useAuth } from '@/context/AuthContext';
 
 interface User {
@@ -134,13 +136,13 @@ export default function AdminDashboard() {
 
   const getTabsForRole = () => {
     const tabs = [
-      { id: 'executive', label: '🟩 Executive Board', icon: <Users className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'project_leader'] },
-      { id: 'overview', label: '📊 Pregled', icon: <BarChart className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'project_leader'] },
-      { id: 'analytics', label: '📈 Analitika', icon: <TrendingUp className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin'] },
+      { id: 'hierarchy', label: '📊 Hijerarhija', icon: <ArrowUpCircle className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'executive_board'] },
+      { id: 'executive', label: '🟩 Zeleni Sto', icon: <Users className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'executive_board', 'admin', 'community_lead'] },
       { id: 'users', label: '👥 Korisnici', icon: <Users className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin'] },
-      { id: 'projects', label: '💼 Projekti', icon: <Briefcase className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'project_leader'] },
-      { id: 'moderation', label: '🛡️ Moderacija', icon: <Shield className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'moderator', 'moderator_lead', 'community_lead'] },
-      { id: 'support', label: '🎧 Podrška', icon: <MessageSquare className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'support_agent', 'support_lead'] },
+      { id: 'analytics', label: '📈 Analitika', icon: <TrendingUp className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'executive_board'] },
+      { id: 'projects', label: '💼 Projekti', icon: <Briefcase className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'executive_board', 'project_leader'] },
+      { id: 'moderation', label: '🛡️ Moderacija', icon: <Shield className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'community_lead', 'moderator'] },
+      { id: 'support', label: '🎧 Podrška', icon: <MessageSquare className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'support_lead', 'support_agent'] },
       { id: 'verification', label: '✅ Verifikacija', icon: <UserCheck className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin'] },
       { id: 'upgrades', label: '⬆️ Rangovi', icon: <ArrowUp className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin'] },
     ];
@@ -184,25 +186,47 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-3">
             <span className="text-sm text-dark-400">{authUser.nickname}</span>
-            <span className="px-2 py-1 bg-yellow-500/20 text-yellow-400 text-xs rounded border border-yellow-500/30">
-              {getRoleName(currentUserRole || '')}
-            </span>
+            {(() => {
+              const visual = getVisualConfig(currentUserRole as UserRole);
+              return (
+                <span className={`px-3 py-1.5 rounded-lg text-xs font-medium bg-gradient-to-r ${visual.colorClass} bg-opacity-20 border ${visual.borderColor}`}>
+                  {visual.icon} {visual.name}
+                </span>
+              );
+            })()}
           </div>
         </div>
       </nav>
 
       <main className="pt-20 pb-8 px-4">
         <div className="max-w-6xl mx-auto">
-          {/* DEBUG INFO - Ukloni kasnije */}
-          <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg text-xs text-yellow-400">
-            <p>Role iz baze: <strong>{currentUserRole || 'NEMA'}</strong></p>
-            <p>Auth user role: <strong>{authUser?.role || 'NEMA'}</strong></p>
-          </div>
-          
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold mb-2">Admin Panel</h1>
-            <p className="text-dark-400">Dobrodošao, {authUser.nickname}!</p>
-          </div>
+          {/* User Access Info */}
+          {(() => {
+            const userVisual = getVisualConfig(currentUserRole as UserRole);
+            const escalation = ESCALATION_PATHS[currentUserRole as UserRole];
+            return (
+              <div className="mb-6 p-4 bg-dark-800/50 rounded-xl border border-dark-700">
+                <div className="flex items-center gap-4 mb-3">
+                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${userVisual.colorClass} flex items-center justify-center text-xl`}>
+                    {userVisual.icon}
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-bold">{userVisual.name}</h1>
+                    <p className="text-sm text-dark-400">{userVisual.description}</p>
+                  </div>
+                </div>
+                {escalation.nextLevel && (
+                  <div className="flex items-center gap-2 text-sm">
+                    <ArrowUp className="w-4 h-4 text-orange-400" />
+                    <span className="text-dark-400">Eskalira ka:</span>
+                    <span className="font-medium">
+                      {ROLES[escalation.nextLevel].icon} {ROLES[escalation.nextLevel].name}
+                    </span>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           <div className="flex gap-2 mb-6 overflow-x-auto">
             {getTabsForRole().map((tab) => (
@@ -289,8 +313,109 @@ export default function AdminDashboard() {
             </div>
           )}
 
-          {activeTab === 'overview' && (
+          {activeTab === "hierarchy" && (
             <div className="space-y-6">
+              {/* Hierarhija Vizualizacija */}
+              <Card className="p-6 bg-gradient-to-br from-dark-800 to-dark-900">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <ArrowUpCircle className="w-5 h-5 text-yellow-400" />
+                  📌 Hierarhija Sistema
+                </h3>
+                
+                <div className="relative">
+                  {/* Linije koje povezuju */}
+                  <div className="absolute left-8 top-8 bottom-8 w-0.5 bg-gradient-to-b from-yellow-400 via-blue-400 to-green-400 opacity-30" />
+                  
+                  <div className="space-y-2">
+                    {[
+                      { role: 'founder', name: '👑 Founder', color: 'yellow' },
+                      { role: 'vision_lead', name: '💡 Vision Lead', color: 'blue' },
+                      { role: 'executive_board', name: '🏛 Executive Board', color: 'violet' },
+                      { role: 'admin', name: '⚡ Admin', color: 'cyan' },
+                      { role: 'community_lead', name: '🌿 Community Lead', color: 'green' },
+                      { role: 'moderator', name: '🛡 Moderator', color: 'orange' },
+                      { role: 'support_agent', name: '🎤 Support Agent', color: 'blue' },
+                    ].map((item, index) => {
+                      const visual = getVisualConfig(item.role as UserRole);
+                      const escalation = ESCALATION_PATHS[item.role as UserRole];
+                      
+                      return (
+                        <div key={item.role} className="relative flex items-center gap-4 p-3 bg-dark-700/50 rounded-lg hover:bg-dark-700 transition-colors">
+                          <div className={`w-16 h-16 rounded-xl bg-gradient-to-br ${visual.colorClass} flex items-center justify-center text-2xl z-10`}>
+                            {visual.icon}
+                          </div>
+                          <div className="flex-1">
+                            <p className="font-bold">{visual.name}</p>
+                            <p className="text-xs text-dark-400">{visual.description}</p>
+                            {index < 6 && (
+                              <p className="text-xs text-dark-500 mt-1">
+                                → {escalation.nextLevel ? ROLES[escalation.nextLevel].icon + ' ' + ROLES[escalation.nextLevel].name : 'Kraj'}
+                              </p>
+                            )}
+                          </div>
+                          <ArrowRight className="w-5 h-5 text-dark-500" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </Card>
+
+              {/* Eskalacioni Put */}
+              <Card className="p-6">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <ArrowUp className="w-5 h-5 text-orange-400" />
+                  📊 Eskalacioni Tokovi
+                </h3>
+                
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div className="p-4 bg-dark-700/50 rounded-xl">
+                    <p className="text-sm font-bold mb-2">🎧 Support</p>
+                    <p className="text-xs text-dark-400">Polaznik → Support Agent → Support Lead → Admin → Vision Lead → Founder</p>
+                  </div>
+                  <div className="p-4 bg-dark-700/50 rounded-xl">
+                    <p className="text-sm font-bold mb-2">🛡 Moderacija</p>
+                    <p className="text-xs text-dark-400">Moderator → Community Lead → Executive Board → Vision Lead → Founder</p>
+                  </div>
+                  <div className="p-4 bg-dark-700/50 rounded-xl">
+                    <p className="text-sm font-bold mb-2">🚀 Project Leader</p>
+                    <p className="text-xs text-dark-400">Project Leader → Executive Board → Vision Lead → Founder</p>
+                  </div>
+                  <div className="p-4 bg-dark-700/50 rounded-xl">
+                    <p className="text-sm font-bold mb-2">🌿 Community Lead</p>
+                    <p className="text-xs text-dark-400">Community Lead → Executive Board → Vision Lead → Founder</p>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Kanali */}
+              <Card className="p-6">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-blue-400" />
+                  📁 Kanali
+                </h3>
+                
+                <div className="grid md:grid-cols-3 gap-3">
+                  {Object.entries(CHANNELS).map(([key, channel]) => {
+                    const canAccess = channel.allowedRoles.includes(currentUserRole);
+                    return (
+                      <div 
+                        key={key}
+                        className={`p-3 rounded-lg border ${canAccess ? 'bg-green-500/10 border-green-500/30' : 'bg-dark-700/50 border-dark-600 opacity-50'}`}
+                      >
+                        <p className={`text-sm font-medium ${canAccess ? 'text-green-400' : 'text-dark-400'}`}>
+                          {channel.name}
+                        </p>
+                        <p className="text-xs text-dark-500 mt-1">
+                          {canAccess ? '✓ Dostupan' : '✗ Nije dostupan'}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+
+              {/* Statistike */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <Card className="p-4">
                   <div className="flex items-center gap-3">
