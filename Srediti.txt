@@ -1,0 +1,47 @@
+TEXT ZA ASISTENTA KAKO DA NASTAVI APP I DODA UI UX I DETALJE POPUNI
+
+Sajt ima 5 glavna ekrana i jedan je dodatni sesti ako je korisnik neki od rolova onda ima i admin dashboard cije je ime ukraseno da bi taj ekran izgledao istaknutije, prestiznije ali idalje  istom tonu sajta. Svrha je da ko je unutra se oseca uvazenim.
+
+-Glavni ekrani sajta su Landing page (njega cemo jos sredjivati ali ga PUSH GIT), Login or Register stranica (Nji cemo jos sredjivati ali PUSH GIT),Nakon logovanja korisnika vodi na njegov profil i nakon prvog logovanja dobija kratku poruku koja iskoci na ekranu Dobrodosli u zajednicu istomisljenika i ljudi koji zele da promene svoj zivot na bolje i ispod neki kratak uvod gde je opisano ukratko da korisnik slobodno izdvoji vreme i vidi sta ga interesuje i da svoj feedback koji puno znaci jer je projekat puno veci od jedne osobe i posto gradimo sistem svaka jedinka i koirisnik je bitan.
+(Ovaj deo lepo osmisli i gramaticki i neka bude privlacan i shvatljiv, ispod dodaj checkmark nemoj mi vise prikazivati i koji funkcionise kada ga cekiraju vise ne iskace popup dobrodoslice i ispod veliko pravougono dugme sa efektom i pise Zapocni put Uspeha).
+
+-Korisnik odatle ima mogucnost sa profila brzu navigaciju ka zajednici ili kursevima, klikom na neka od ta dva dugmeta oni vode na ono sto je korisnik odabrao.
+-Donji bar na kom pise kursevi, zajednica, profil napravi manje invazivan na oci jer trenutno zauzima veliki deo ekrana i neka budu providni ali jasno vidljivi quickacessi.
+-Zajednica PUSH GIT ali cemo je jos sredjivati.
+-Admin panel napravi za ljude sa rolovima. Automatski po dobijanju rola na profli se dodaje nova brza navigacija pored zajednice i kurseva Admin.
+-Admin panel je dozvoljen samo ljudima sa rolom a ko pokusa bez rola da pristupi dobija prozor sa crvenim stitom i ispod nesto ispisano da mu nije dozvoljeno i da mora da zaradi svoj pristup.
+-Admin panel je podeljen na nekoliko sekcija. Glavna sekcija iliti stranica koja je prva se zove Executive Board i po sredini je veliki sto u OBLIKU pokeraskog stola, oval iliti racetrack staza oblik. U gornjem levom delu iznad stola je ispisano Zeleni Sto - Ovde se donose bitne odluke.
+-Sa desne gornje strane iznad stola stoji dugme Dodaj Clana, pritiskom na dugme otvara se prozor sa ljudima unutar zajednice, searchbarom koji funkcionise i koji nakon upisivanja nickname prikazuje korisnika i to vec pri kucanju ga nalazi a ispod searchbara ma scroll gde se spustaju imena ljudi registrovani na sajtu i to hijararhijski poredjani od foundera,vision lead,Admin, Executive Board, Community Leader, Support Leader, Support Agent, Moderator i onda idu Rankovi Vizionar,Izvrsni Direktor, Preduzetnik, Kandidat za Biznis, Pripravnik, Aktivni Ucenik, Polaznik.
+
+-Klikom na nekih od ljudi koji su iz zajednice automatski se ubacuiju na Zeleni sto i svi prisutni u admin panelu to vide i oni ostaju tu a Founder i Vision Leader mogu da ga izbace iz stola.
+-Na stolu su prikazani nicknaimovi, slika i njihovi rolovi founder,admin, itd. 
+-Ispod tog stola je chat funkcionalan za pisanje poruka koji vide samo ljudi koji su u Zelenom stolu.
+-Ispod tog cheta stoje chatovi Za Support *ko je support agent ili support lead dobija obavestenje za tiket*
+-Pored su jednako isto rasporedjeni i cetovi Moderatora,Admina, Project leadera i otali a ono sto ce pisati i ko ce moci sta da vidi pise ispod i to lepo uklopi i neka svaki chet funkcionise i po tome napravi da u svakom chetu bude kratka poruka eskalacije problema ako oni ne mogu da rese po uputstvima hijarehije ispod:
+
+IZGLED HIJERARHIJE 
+Polaznik → Support Agent → Support Lead → Admin / 
+Community Lead → Executive Board → Vision Lead → Founder 
+Svako ce imati svoje grupne kanale gde ce moci da pricaju medjusobno o trenutnim temama i desavanjima.
+Support tim ima svoj cet gde i agenti i lideri preuzimaju posao pricanja sa polaznicima i pomaganjem i u slucaju nekih vecih problema kontaktiraju admina koji dalje razresava situaciju
+Moderatori imaju svoj cet i oni su *redari* zajednice i neke vece eskalacije ili nesto sto su primetili da je nerazjasnjeno preusmeravaju Community Leadu 
+oni imaju svoj cet gde pricaju o kanalima i prate komunikaciju i uklanjaju neprimeren i uvredljiv sadrzaj, smiruje rasprave i dolaze do brzih resenja
+Community Lead saradjuje sa moderatorima i predlazu poboljsanja zajednice, odrzavaju zdravu, porodicnu i profesionalnu atmnosferu i obraca se Executive Boardu ili  Leaderu ako je ozbiljno 
+Oni imaju svoj cet takodje gde diskutuju o svim preduzetim koracima i buducim
+Admin kao tehnicka i sistemska vlast ima odredjenu dozvolu kontrole sistema i aplikacije i upravljaju pravilima, pristupima i ulogama, reaguje na ozbiljne sistemske probleme i ima jaku veliku odgovornost pravilne kontrole sistema 
+Imaju svoj cet i u njemu su i lider i founder ( FOUNDER i LIDER imaju mogucnost pristupa svim kanalima)
+Project Leader nakon dodeljene titule ima pravo da otvori svoj cet i ubaci ljude od poverenja i sa njima da diskutuje o projektu koji prave, ulazu ili sa kojim se takmice.. On je odgovoran za termine, zadatke i izvestaje i komunicira status projekta ka visim nivoima.
+Oni imaju mogucnost dva ceta, prvi je Projekat *pa naziv projekta* a drugi je sa ostalim project liderima koji su takodje postavljeni na tu poziciju i mogu strateski da se organizuju, udruzavaju, razgovaraju i stvaraju realne konekcije kao neki ljudi koji su se vise istakli od drugih 
+Executive Board uzi krug ljudi od poverenja koji sprovode viziju i daju smernice koje su zadali Founder i CCO *leader* , ucestvuju u donosenju vaznih odluka, daju savete, analize i preglede. Mogu biti angazovani za specijalne projekte, dogadjaje i krizne momente. 
+Imaju cet executive board gde su sve bitni ljudi i imaju cet u kom su i project lideri zarad hvatanja dobre investicione prilike, medjusobnog pomaganja i odrzavanja projekata u pogonu 
+Vision Lead CCO - covek apsolutnog poverenja koji je operativni produzetak foundera kada je odsutan, filtrira zahteve i prosledjuje meni neophodne stvari i stvari koje nisam imao vremena da vidim, razvija nove pravce, ideje i strateske inicijative i ima uvid u sve kljucne tokove 
+Imamo zajednicki cet i prisutni smo u ostalim cetovima
+
+-Ovo je jedna sekcija, sledeca sekcija je Unapredjenja i ovoj stranici imaju pristup samo Founder, Vision Lead i Admin. OSTALI NE MOGU DA MENJAJU ROLOVE I RANK.
+-fOUNDER,VISION LEAD I ADMIN na ovom panelu vide korisnike, takodje postoji search bar radi lakse pretrage i ispod su korisnici prikazani, svakom korisniku moze da se promeni Rank od polaznika do Vizionara i automatski mu se prikazuje na profilu i u sekciji sta svaki rang otkljucava, prikazano je blizu imena i u cetovima svaki njihov rank  i rang.
+-Rang takodje je je promenjljiv i tim otkljucavanjem korisnik automatski dobija otkljucane privilegije tog rola.
+-Ova dva dugmeta su lepog i modernog dizajna kao i svako dugme u admin panelu.
+-Budi kreativan za jos dve sekcije koje su smislene i dodaj ih.
+
+Ovde smo delimicno razradili 3 glavne stranice i jedan admin panel. ostali su zajednica i kursevi sto cemo posle ovog.
+

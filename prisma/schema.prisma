@@ -1,5 +1,4 @@
 // Prisma Schema for Institut Biznis Platform
-// Database: PostgreSQL
 
 generator client {
   provider = "prisma-client-js"
@@ -10,7 +9,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ==================== USER ====================
 model User {
   id                    String    @id @default(cuid())
   email                 String    @unique
@@ -20,255 +18,70 @@ model User {
   bio                   String?   @db.VarChar(160)
   avatarUrl             String?
   location              String?
+  industry              String?
+  yearsExperience       Int?
   rankLevel             Int       @default(1)
   xpPoints              Int       @default(0)
-  subscriptionStatus    String    @default("none") // none, active, expired
+  role                  String    @default("polaznik")
+  subscriptionStatus    String    @default("none")
   subscriptionExpiresAt DateTime?
   verified              Boolean   @default(false)
-  verificationVideoUrl  String?
+  verificationStatus    String    @default("none")
+  verificationExpiresAt DateTime?
+  promotionBalance      Float     @default(0)
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  // Relations
-  subscription          Subscription?
-  coursesCreated       Course[]          @relation("CourseInstructor")
-  lessonsCompleted     UserLesson[]
-  messages             Message[]
-  achievements         UserAchievement[]
-  challengesJoined     ChallengeTeamMember[]
-  sentMessages         DirectMessage[]   @relation("Sender")
-  receivedMessages     DirectMessage[]   @relation("Receiver")
+  enrollments          Enrollment[]
 
   @@index([email])
   @@index([nickname])
 }
 
-// ==================== SUBSCRIPTION ====================
-model Subscription {
-  id                    String   @id @default(cuid())
-  userId                String   @unique
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  planType              String   @default("none") // monthly, basic, community
-  stripeCustomerId      String?
-  stripeSubscriptionId  String?
-  status                String   @default("active")
-  currentPeriodEnd      DateTime?
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  @@index([stripeCustomerId])
-}
-
-// ==================== COURSE ====================
 model Course {
-  id                    String   @id @default(cuid())
-  title                 String
-  description           String?
-  price                 Float    @default(0)
-  thumbnailUrl          String?
-  instructorId          String?
-  instructor            User?    @relation("CourseInstructor", fields: [instructorId], references: [id])
-  createdByAdmin        Boolean  @default(false)
-  isPublished           Boolean  @default(false)
-  isPremium             Boolean  @default(false)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String?
+  price       Int      @default(0) // In RSD
+  thumbnail   String?
+  published   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  // Relations
-  lessons               Lesson[]
-  userProgress           UserLesson[]
-  userAccess            UserCourseAccess[]
-  courseChannel         Channel?  @relation("CourseChannel")
-
-  @@index([instructorId])
+  lessons     Lesson[]
+  enrollments Enrollment[]
 }
 
-// ==================== LESSON ====================
 model Lesson {
-  id                    String   @id @default(cuid())
-  courseId              String
-  course                Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  title                 String
-  videoUrl              String?
-  content               String?  @db.Text
-  order                 Int
-  xpReward              Int      @default(0)
-  isLocked              Boolean  @default(true)
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
+  id          String   @id @default(cuid())
+  courseId    String
+  title       String
+  description String?
+  videoUrl    String?
+  pdfUrl      String?
+  duration    Int?     // Duration in minutes
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
 
-  // Relations
-  userProgress          UserLesson[]
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
 }
 
-// ==================== USER LESSON PROGRESS ====================
-model UserLesson {
-  id                    String   @id @default(cuid())
-  userId                String
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  lessonId              String
-  lesson                Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
-  isCompleted           Boolean  @default(false)
-  xpEarned              Int      @default(0)
-  completedAt           DateTime?
+model Enrollment {
+  id          String   @id @default(cuid())
+  userId      String
+  courseId    String
+  progress    Int      @default(0) // Percentage 0-100
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  @@unique([userId, lessonId])
-  @@index([userId])
-  @@index([lessonId])
-}
-
-// ==================== USER COURSE ACCESS ====================
-model UserCourseAccess {
-  id                    String   @id @default(cuid())
-  userId                String
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  courseId              String
-  course                Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  purchasedAt           DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@unique([userId, courseId])
   @@index([userId])
   @@index([courseId])
-}
-
-// ==================== CHANNEL ====================
-model Channel {
-  id                    String   @id @default(cuid())
-  name                  String
-  description           String?
-  category              String   @default("general") // general, course, challenge, admin
-  isPrivate             Boolean  @default(false)
-  courseId              String?  @unique
-  course                Course?  @relation("CourseChannel", fields: [courseId], references: [id])
-  createdAt             DateTime @default(now())
-  updatedAt             DateTime @updatedAt
-
-  // Relations
-  messages              Message[]
-  userChannels          UserChannel[]
-
-  @@index([category])
-}
-
-// ==================== USER CHANNEL PERMISSION ====================
-model UserChannel {
-  id                    String   @id @default(cuid())
-  userId                String
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  channelId             String
-  channel               Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  role                  String   @default("member") // member, moderator, admin
-
-  @@unique([userId, channelId])
-  @@index([userId])
-  @@index([channelId])
-}
-
-// ==================== MESSAGE ====================
-model Message {
-  id                    String   @id @default(cuid())
-  channelId             String
-  channel               Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
-  userId                String
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  content               String   @db.Text
-  createdAt             DateTime @default(now())
-
-  @@index([channelId])
-  @@index([userId])
-  @@index([createdAt])
-}
-
-// ==================== DIRECT MESSAGE ====================
-model DirectMessage {
-  id                    String   @id @default(cuid())
-  senderId              String
-  sender                User     @relation("Sender", fields: [senderId], references: [id], onDelete: Cascade)
-  receiverId            String
-  receiver              User     @relation("Receiver", fields: [receiverId], references: [id], onDelete: Cascade)
-  content               String
-  createdAt             DateTime @default(now())
-
-  @@index([senderId])
-  @@index([receiverId])
-}
-
-// ==================== ACHIEVEMENT ====================
-model Achievement {
-  id                    String   @id @default(cuid())
-  name                  String   @unique
-  icon                  String
-  description           String
-  xpReward              Int      @default(0)
-  criteriaType          String
-  criteriaValue         Int
-
-  // Relations
-  userAchievements      UserAchievement[]
-
-  @@index([criteriaType])
-}
-
-// ==================== USER ACHIEVEMENT ====================
-model UserAchievement {
-  id                    String   @id @default(cuid())
-  userId                String
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  achievementId         String
-  achievement           Achievement @relation(fields: [achievementId], references: [id], onDelete: Cascade)
-  earnedAt              DateTime @default(now())
-
-  @@unique([userId, achievementId])
-  @@index([userId])
-  @@index([achievementId])
-}
-
-// ==================== CHALLENGE ====================
-model Challenge {
-  id                    String   @id @default(cuid())
-  title                 String
-  description           String?
-  rules                 String?
-  startDate             DateTime
-  endDate               DateTime
-  rewards               String?
-  isActive              Boolean  @default(true)
-  createdAt             DateTime @default(now())
-
-  // Relations
-  teams                 ChallengeTeam[]
-
-  @@index([isActive])
-}
-
-// ==================== CHALLENGE TEAM ====================
-model ChallengeTeam {
-  id                    String   @id @default(cuid())
-  challengeId           String
-  challenge             Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  name                  String
-  submittedPlan         String?  @db.Text
-  submittedAt           DateTime?
-  status                String   @default("active") // active, submitted, winner
-
-  // Relations
-  members               ChallengeTeamMember[]
-
-  @@index([challengeId])
-}
-
-// ==================== CHALLENGE TEAM MEMBER ====================
-model ChallengeTeamMember {
-  id                    String   @id @default(cuid())
-  userId                String
-  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  teamId                String
-  team                  ChallengeTeam @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  joinedAt              DateTime @default(now())
-
-  @@unique([userId, teamId])
-  @@index([userId])
-  @@index([teamId])
 }

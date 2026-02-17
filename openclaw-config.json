@@ -1,0 +1,26 @@
+{
+  "channels": {
+    "discord": {
+      "enabled": true,
+      "token": "YOUR_DISCORD_BOT_TOKEN",
+      "dm": {
+        "enabled": true,
+        "policy": "pairing"
+      },
+      "groupPolicy": "allowlist"
+    },
+    "telegram": {
+      "enabled": true,
+      "token": "8528251861:AAEifNfbUtFPR3leGl0w-jtMjQArjWlcx-I"
+    }
+  },
+  "tools": {
+    "profile": "coding"
+  },
+  "messages": {
+    "tts": {
+      "enabled": false
+    },
+    "ackReaction": "👍"
+  }
+}
