@@ -1,0 +1,361 @@
+// ==========================================
+// INSTITUT BIZNIS - CHANNELS & MESSAGES DATABASE
+// ==========================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ==========================================
+// CHANNELS
+// ==========================================
+model Channel {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String?
+  channelType     ChannelType @default(GENERAL)
+  accessLevel     AccessLevel @default(FREE)
+  parentId        String?
+  parent          Channel?   @relation("ChannelHierarchy", fields: [parentId], references: [id])
+  children        Channel[]  @relation("ChannelHierarchy")
+  isPinned        Boolean  @default(false)
+  rules           String?   // Markdown formatted rules
+  showRulesOnce   Boolean  @default(true)
+  color           String?   // Hex color for channel badge
+  icon            String?
+  order           Int      @default(0)
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  messages       Message[]
+  pinnedMessages PinnedMessage[]
+  reactions      MessageReaction[]
+  participants   ChannelParticipant[]
+  
+  @@index([slug])
+  @@index([channelType])
+  @@index([accessLevel])
+}
+
+enum ChannelType {
+  GENERAL
+  COURSE
+  COMMUNITY
+  SUPPORT
+  PROJECT
+  PRIVATE
+}
+
+enum AccessLevel {
+  FREE        // All users can see
+  LOCKED      // Visible but locked for free users
+  COURSE      // Only course purchasers
+  MEMBERSHIP  // Only paid members
+  PRIVATE     // Invite only
+}
+
+// ==========================================
+// MESSAGES
+// ==========================================
+model Message {
+  id              String   @id @default(cuid())
+  content         String   @db.Text
+  channelId       String
+  channel         Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  authorId        String
+  author          User     @relation(fields: [authorId], references: [id])
+  parentId        String?  // For thread replies
+  parent          Message? @relation("ThreadReplies", fields: [parentId], references: [id])
+  replies         Message[] @relation("ThreadReplies")
+  replyCount      Int      @default(0)
+  isEdited        Boolean  @default(false)
+  isDeleted       Boolean  @default(false)
+  deletedAt       DateTime?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  reactions       MessageReaction[]
+  comments        MessageComment[]
+  
+  @@index([channelId])
+  @@index([authorId])
+  @@index([parentId])
+  @@index([createdAt])
+}
+
+// ==========================================
+// MESSAGE COMMENTS (Threads)
+// ==========================================
+model MessageComment {
+  id          String   @id @default(cuid())
+  content     String   @db.Text
+  messageId   String
+  message     Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  isDeleted   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  
+  @@index([messageId])
+  @@index([authorId])
+}
+
+// ==========================================
+// MESSAGE REACTIONS
+// ==========================================
+model MessageReaction {
+  id          String   @id @default(cuid())
+  messageId   String
+  message     Message  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  emoji      String   // Unicode emoji
+  createdAt  DateTime @default(now())
+  
+  @@unique([messageId, userId, emoji])
+  @@index([messageId])
+}
+
+// ==========================================
+// PINNED MESSAGES
+// ==========================================
+model PinnedMessage {
+  id          String   @id @default(cuid())
+  channelId   String
+  channel     Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  messageId   String
+  message     Message  @relation(fields: [messageId], references: [id])
+  pinnedBy    String
+  pinnedByUser User    @relation(fields: [pinnedBy], references: [id])
+  reason      String?   // Why was it pinned
+  createdAt   DateTime @default(now())
+  
+  @@unique([channelId, messageId])
+  @@index([channelId])
+}
+
+// ==========================================
+// CHANNEL PARTICIPANTS
+// ==========================================
+model ChannelParticipant {
+  id          String   @id @default(cuid())
+  channelId   String
+  channel     Channel  @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  joinedAt   DateTime @default(now())
+  lastReadAt  DateTime @default(now())
+  isMuted    Boolean  @default(false)
+  isHidden   Boolean  @default(false)
+  
+  @@unique([channelId, userId])
+  @@index([userId])
+}
+
+// ==========================================
+// PRIVATE CONVERSATIONS
+// ==========================================
+model Conversation {
+  id            String   @id @default(cuid())
+  type          ConversationType @default(PRIVATE)
+  createdBy     String
+  createdByUser User      @relation(fields: [createdBy], references: [id])
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  participants  ConversationParticipant[]
+  messages     PrivateMessage[]
+  
+  @@index([createdBy])
+}
+
+enum ConversationType {
+  PRIVATE
+  GROUP
+}
+
+model ConversationParticipant {
+  id            String   @id @default(cuid())
+  conversationId String
+  conversation  Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  joinedAt       DateTime @default(now())
+  leftAt        DateTime?
+  isAdmin       Boolean  @default(false)  // For group chats
+  
+  @@unique([conversationId, userId])
+  @@index([userId])
+}
+
+model PrivateMessage {
+  id            String   @id @default(cuid())
+  conversationId String
+  conversation  Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId      String
+  sender        User     @relation(fields: [senderId], references: [id])
+  content       String   @db.Text
+  isRead        Boolean  @default(false)
+  readAt        DateTime?
+  createdAt     DateTime @default(now())
+  
+  @@index([conversationId])
+  @@index([senderId])
+}
+
+// ==========================================
+// USER RELATIONS (Friends, Praises)
+// ==========================================
+model UserRelation {
+  id          String   @id @default(cuid())
+  fromUserId  String
+  fromUser    User     @relation("UserRelationsFrom", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId    String
+  toUser      User     @relation("UserRelationsTo", fields: [toUserId], references: [id], onDelete: Cascade)
+  type        RelationType
+  createdAt   DateTime @default(now())
+  
+  @@unique([fromUserId, toUserId, type])
+  @@index([fromUserId])
+  @@index([toUserId])
+}
+
+enum RelationType {
+  FRIEND
+  FOLLOWING
+  BLOCKED
+}
+
+// ==========================================
+// PRAISE / ADVICE SYSTEM (For reputation)
+// ==========================================
+model Praise {
+  id          String   @id @default(cuid())
+  fromUserId  String
+  fromUser    User     @relation("PraiseGiven", fields: [fromUserId], references: [id], onDelete: Cascade)
+  toUserId    String
+  toUser      User     @relation("PraiseReceived", fields: [toUserId], references: [id], onDelete: Cascade)
+  type        PraiseType
+  messageId   String?  // If related to a message
+  message     Message?  @relation(fields: [messageId], references: [id])
+  channelId   String?  // Where it happened
+  reason      String?   // Optional reason
+  createdAt   DateTime @default(now())
+  
+  @@index([toUserId])
+  @@index([fromUserId])
+}
+
+enum PraiseType {
+  ADVICE      // "Posavetovao me je"
+  PRAISE      // "Pohvala"
+  THANK       // "Hvala na pomoći"
+  RECOMMEND   // "Preporučujem"
+}
+
+// ==========================================
+// USER REPUTATION (Aggregated stats)
+// ==========================================
+model UserReputation {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  adviceCount   Int      @default(0)
+  praiseCount   Int      @default(0)
+  thankCount    Int      @default(0)
+  recommendCount Int     @default(0)
+  friendsCount  Int      @default(0)
+  reputationScore Int    @default(0)  // Calculated: advice*10 + praise*5 + thank*3 + recommend*7
+  level        String   @default("Novajlija")
+  updatedAt     DateTime @updatedAt
+  
+  @@index([reputationScore])
+}
+
+// ==========================================
+// ESCALATION REQUESTS
+// ==========================================
+model EscalationRequest {
+  id          String   @id @default(cuid())
+  channelId   String?
+  messageId   String?
+  fromUserId  String
+  fromUser    User     @relation(fields: [fromUserId], references: [id])
+  toRole     String    // Role to escalate to
+  reason      String   @db.Text
+  status      EscalationStatus @default(PENDING)
+  handledBy   String?
+  handledByUser User?    @relation(fields: [handledBy], references: [id])
+  resolution   String?
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  
+  @@index([fromUserId])
+  @@index([toRole])
+  @@index([status])
+}
+
+enum EscalationStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+  REJECTED
+}
+
+// ==========================================
+// USER (Extended for community features)
+// ==========================================
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  nickname        String   @unique
+  passwordHash    String
+  fullName        String?
+  bio             String?
+  avatarUrl       String?
+  
+  // Community features
+  rankLevel       Int      @default(1)
+  xpPoints        Int      @default(0)
+  role           String   @default("polaznik")
+  verified        Boolean  @default(false)
+  
+  // Subscription
+  subscriptionStatus String @default("none")
+  subscriptionEndsAt DateTime?
+  hasCourseAccess  Boolean @default(false)
+  courseAccessEndsAt DateTime?
+  
+  // Timestamps
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  lastActiveAt    DateTime @default(now())
+  
+  // Relations
+  messages        Message[]
+  comments        MessageComment[]
+  reactions       MessageReaction[]
+  pinnedMessages  PinnedMessage[] @relation("PinnedBy")
+  channelParticipants ChannelParticipant[]
+  conversationsCreated Conversation[] @relation("CreatedBy")
+  conversationParticipation ConversationParticipant[]
+  privateMessages  PrivateMessage[]
+  relationsFrom   UserRelation[] @relation("UserRelationsFrom")
+  relationsTo     UserRelation[] @relation("UserRelationsTo")
+  praisesGiven    Praise[] @relation("PraiseGiven")
+  praisesReceived Praise[] @relation("PraiseReceived")
+  reputation      UserReputation?
+  escalations     EscalationRequest[]
+  handledEscalations EscalationRequest[] @relation("HandledBy")
+  
+  @@index([role])
+  @@index([subscriptionStatus])
+  @@index([rankLevel])
+}
