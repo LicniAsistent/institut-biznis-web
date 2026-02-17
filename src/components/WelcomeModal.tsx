@@ -64,12 +64,16 @@ export default function WelcomeModal({ isOpen, onClose }: WelcomeModalProps) {
           {/* Content */}
           <div className="pt-12 p-6 text-center">
             <h2 className="text-2xl font-bold mb-2">
-              Dobrodošao u zajednicu! 👋
+              Dobrodošao u Institut Biznis! 🎓
             </h2>
             
-            <p className="text-dark-400 mb-6">
-              Ovde smo svi istomišljenici koji žele da promene svoj život na bolje. 
-              Spreman si da započneš svoju priču?
+            <p className="text-dark-300 mb-4">
+              Ušao si u zajednicu istomišljenika — ljudi koji su odlučili da promene svoj život i krenu putem preduzetništva.
+            </p>
+            
+            <p className="text-dark-400 text-sm mb-6">
+              Ovde možeš slobodno da izdvojiš vreme, istražiš kurseve koji te zanimaju i pronađeš ljude sa kojima možeš sarađivati. 
+              Tvoj doprinos i feedback su nam jako važni — zajedno gradimo nešto veće od nas samih.
             </p>
 
             {/* Features */}

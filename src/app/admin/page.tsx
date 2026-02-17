@@ -8,7 +8,8 @@ import { Avatar } from '@/components/ui/Avatar';
 import { 
   Users, Shield, Crown, ChevronDown, ChevronUp, Edit, ArrowUp,
   Settings, BarChart, MessageSquare, UserCheck, AlertTriangle,
-  Search, Trophy, Zap, DollarSign, TrendingUp, Activity, BookOpen
+  Search, Trophy, Zap, DollarSign, TrendingUp, Activity, BookOpen,
+  Briefcase
 } from 'lucide-react';
 import { ROLES, RANK_LEVELS } from '@/lib/rbac';
 import { useAuth } from '@/context/AuthContext';
@@ -134,12 +135,14 @@ export default function AdminDashboard() {
   const getTabsForRole = () => {
     const tabs = [
       { id: 'executive', label: '🟩 Executive Board', icon: <Users className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'project_leader'] },
-      { id: 'overview', label: 'Pregled', icon: <BarChart className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'project_leader'] },
-      { id: 'users', label: 'Korisnici', icon: <Users className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin'] },
-      { id: 'moderation', label: 'Moderacija', icon: <Shield className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'moderator', 'moderator_lead'] },
-      { id: 'support', label: 'Podrška', icon: <MessageSquare className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'moderator', 'moderator_lead', 'support_agent', 'support_lead'] },
-      { id: 'verification', label: 'Verifikacija', icon: <UserCheck className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin'] },
-      { id: 'upgrades', label: '⬆️ Upgrades', icon: <ArrowUp className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin'] },
+      { id: 'overview', label: '📊 Pregled', icon: <BarChart className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'project_leader'] },
+      { id: 'analytics', label: '📈 Analitika', icon: <TrendingUp className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin'] },
+      { id: 'users', label: '👥 Korisnici', icon: <Users className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin'] },
+      { id: 'projects', label: '💼 Projekti', icon: <Briefcase className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'project_leader'] },
+      { id: 'moderation', label: '🛡️ Moderacija', icon: <Shield className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'moderator', 'moderator_lead', 'community_lead'] },
+      { id: 'support', label: '🎧 Podrška', icon: <MessageSquare className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin', 'support_agent', 'support_lead'] },
+      { id: 'verification', label: '✅ Verifikacija', icon: <UserCheck className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin'] },
+      { id: 'upgrades', label: '⬆️ Rangovi', icon: <ArrowUp className="w-4 h-4" />, roles: ['founder', 'vision_lead', 'admin'] },
     ];
     return tabs.filter(tab => tab.roles.includes(currentUserRole));
   };
@@ -500,35 +503,388 @@ export default function AdminDashboard() {
           )}
 
           {activeTab === 'moderation' && (
-            <Card className="p-8 text-center">
-              <AlertTriangle className="w-16 h-16 text-yellow-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-2">Moderacija</h2>
-              <p className="text-dark-400">Ovde će se prikazivati prijave i sadržaj za moderaciju.</p>
-            </Card>
+            <div className="space-y-6">
+              <Card className="overflow-hidden">
+                <div className="p-4 border-b border-dark-700 bg-gradient-to-r from-yellow-900/30 to-orange-900/30">
+                  <h3 className="font-bold flex items-center gap-2">
+                    <Shield className="w-5 h-5 text-yellow-400" />
+                    Moderatori - Chat
+                  </h3>
+                  <p className="text-xs text-dark-400 mt-1">Escalation: Polaznik → Moderator → Community Lead → Executive Board</p>
+                </div>
+                <div className="h-80 overflow-y-auto p-4 space-y-3">
+                  <div className="flex gap-3">
+                    <Avatar size="sm">M</Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">Moderator1</span>
+                        <span className="text-xs px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400">Moderator</span>
+                        <span className="text-xs text-dark-500">10:30</span>
+                      </div>
+                      <p className="text-dark-300 text-sm">Primećen neprimeren sadržaj u #general kanalu. Rasprava eskalirana.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <Avatar size="sm">C</Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">CommunityLead</span>
+                        <span className="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">Community Lead</span>
+                        <span className="text-xs text-dark-500">10:32</span>
+                      </div>
+                      <p className="text-dark-300 text-sm">Razrešeno. Poslao upozorenje korisniku.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 border-t border-dark-700">
+                  <div className="flex gap-2">
+                    <input type="text" placeholder="Napiši poruku..." className="flex-1 bg-dark-700 border border-dark-600 rounded-lg px-4 py-2 focus:outline-none focus:border-yellow-500" />
+                    <Button><MessageSquare className="w-4 h-4" /></Button>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Reported Content */}
+              <Card className="p-6">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-red-400" />
+                  Prijave i sadržaj za moderaciju
+                </h3>
+                <div className="space-y-3">
+                  <div className="p-4 bg-dark-800 rounded-lg border border-dark-700">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="font-medium">Korisnik: Marko123</span>
+                      <span className="text-xs px-2 py-0.5 rounded bg-red-500/20 text-red-400">Prijavljen</span>
+                    </div>
+                    <p className="text-dark-300 text-sm mb-3">Neprimeren komentar u #zajednica kanalu</p>
+                    <div className="flex gap-2">
+                      <Button variant="success" size="sm">Odobri</Button>
+                      <Button variant="danger" size="sm">Odbij</Button>
+                      <Button variant="outline" size="sm">Eskaliraj</Button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
           )}
 
           {activeTab === 'support' && (
-            <Card className="p-8 text-center">
-              <MessageSquare className="w-16 h-16 text-blue-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-2">Podrška</h2>
-              <p className="text-dark-400">Ovde će se prikazivati tiketi korisnika.</p>
-            </Card>
+            <div className="space-y-6">
+              <Card className="overflow-hidden">
+                <div className="p-4 border-b border-dark-700 bg-gradient-to-r from-blue-900/30 to-cyan-900/30">
+                  <h3 className="font-bold flex items-center gap-2">
+                    <MessageSquare className="w-5 h-5 text-blue-400" />
+                    Support Tim - Chat
+                  </h3>
+                  <p className="text-xs text-dark-400 mt-1">Escalation: Polaznik → Support Agent → Support Lead → Admin</p>
+                </div>
+                <div className="h-80 overflow-y-auto p-4 space-y-3">
+                  <div className="flex gap-3">
+                    <Avatar size="sm">A</Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">SupportAgent</span>
+                        <span className="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">Agent</span>
+                        <span className="text-xs text-dark-500">10:25</span>
+                      </div>
+                      <p className="text-dark-300 text-sm">Novi tiket od korisnika: Ne mogu da pristupim kursu.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3">
+                    <Avatar size="sm">L</Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">SupportLead</span>
+                        <span className="text-xs px-2 py-0.5 rounded bg-cyan-500/20 text-cyan-400">Lead</span>
+                        <span className="text-xs text-dark-500">10:28</span>
+                      </div>
+                      <p className="text-dark-300 text-sm">Rešen. Korisnik dobio pristup.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 border-t border-dark-700">
+                  <div className="flex gap-2">
+                    <input type="text" placeholder="Napiši poruku..." className="flex-1 bg-dark-700 border border-dark-600 rounded-lg px-4 py-2 focus:outline-none focus:border-blue-500" />
+                    <Button><MessageSquare className="w-4 h-4" /></Button>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Tickets */}
+              <Card className="p-6">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <AlertTriangle className="w-5 h-5 text-orange-400" />
+                  Tiketi korisnika
+                </h3>
+                <div className="space-y-3">
+                  <div className="p-4 bg-dark-800 rounded-lg border border-dark-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">Problem sa loginom</span>
+                        <span className="text-xs px-2 py-0.5 rounded bg-orange-500/20 text-orange-400">Hitno</span>
+                      </div>
+                      <span className="text-xs text-dark-400">Pre 5 min</span>
+                    </div>
+                    <p className="text-dark-300 text-sm mb-3">Korisnik ne može da se prijavi posle registracije</p>
+                    <div className="flex gap-2">
+                      <Button variant="primary" size="sm">Preuzmi</Button>
+                      <Button variant="outline" size="sm">Eskaliraj</Button>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-dark-800 rounded-lg border border-dark-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">Pitanje o kursu</span>
+                        <span className="text-xs px-2 py-0.5 rounded bg-blue-500/20 text-blue-400">Obično</span>
+                      </div>
+                      <span className="text-xs text-dark-400">Pre 1h</span>
+                    </div>
+                    <p className="text-dark-300 text-sm mb-3">Korisnik pita kada izlazi novi modul</p>
+                    <div className="flex gap-2">
+                      <Button variant="success" size="sm">Odgovori</Button>
+                      <Button variant="outline" size="sm">Zatvori</Button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
           )}
 
           {activeTab === 'verification' && (
-            <Card className="p-8 text-center">
-              <UserCheck className="w-16 h-16 text-green-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-2">Verifikacija</h2>
-              <p className="text-dark-400">Ovde će se prikazivati zahtevi za verifikaciju.</p>
-            </Card>
+            <div className="space-y-6">
+              <Card className="p-6">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <UserCheck className="w-5 h-5 text-green-400" />
+                  Zahtevi za verifikaciju
+                </h3>
+                <div className="space-y-3">
+                  <div className="p-4 bg-dark-800 rounded-lg border border-dark-700">
+                    <div className="flex items-center gap-3 mb-3">
+                      <Avatar size="md">J</Avatar>
+                      <div>
+                        <p className="font-medium">JovanPreduzetnik</p>
+                        <p className="text-xs text-dark-400">jovan@email.com</p>
+                      </div>
+                    </div>
+                    <p className="text-dark-300 text-sm mb-3">Verifikacija za biznis nalog - Auto detailing biznis</p>
+                    <div className="flex gap-2">
+                      <Button variant="success" size="sm">Odobri</Button>
+                      <Button variant="danger" size="sm">Odbij</Button>
+                      <Button variant="outline" size="sm">Zatraži dokaz</Button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
           )}
           
           {activeTab === 'upgrades' && (
-            <Card className="p-8 text-center">
-              <ArrowUp className="w-16 h-16 text-purple-500 mx-auto mb-4" />
-              <h2 className="text-xl font-bold mb-2">Upgrades</h2>
-              <p className="text-dark-400">Upgrades panel.</p>
-            </Card>
+            <div className="space-y-6">
+              <Card className="p-6 bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-500/20">
+                <h3 className="font-bold mb-4 flex items-center gap-2">
+                  <ArrowUp className="w-5 h-5 text-purple-400" />
+                  Upgrades - Rangovi i Privilegije
+                </h3>
+                <p className="text-dark-400 text-sm mb-4">Samo Founder, Vision Lead i Admin mogu menjati rangove.</p>
+                
+                {/* Rank Info */}
+                <div className="grid md:grid-cols-2 gap-4 mb-6">
+                  <div className="p-4 bg-dark-800 rounded-lg">
+                    <h4 className="font-medium mb-2">📚 Polaznik (0 XP)</h4>
+                    <ul className="text-xs text-dark-400 space-y-1">
+                      <li>• Pristup zajednici</li>
+                      <li>• Osnovni profili</li>
+                    </ul>
+                  </div>
+                  <div className="p-4 bg-dark-800 rounded-lg">
+                    <h4 className="font-medium mb-2">📖 Aktivni Učenik (100 XP)</h4>
+                    <ul className="text-xs text-dark-400 space-y-1">
+                      <li>• Sve iz prethodnog</li>
+                      <li>• Pristup besplatnim kursevima</li>
+                    </ul>
+                  </div>
+                  <div className="p-4 bg-dark-800 rounded-lg">
+                    <h4 className="font-medium mb-2">🚀 Preduzetnik (1000 XP)</h4>
+                    <ul className="text-xs text-dark-400 space-y-1">
+                      <li>• Sve iz prethodnog</li>
+                      <li>• Pristup svim kursevima</li>
+                      <li>• XP za svaki post</li>
+                    </ul>
+                  </div>
+                  <div className="p-4 bg-dark-800 rounded-lg">
+                    <h4 className="font-medium mb-2">💎 Vizionar (4000 XP)</h4>
+                    <ul className="text-xs text-dark-400 space-y-1">
+                      <li>• Sve iz prethodnog</li>
+                      <li>• Verified bedž</li>
+                      <li>• Pristup inkubaciji</li>
+                    </ul>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Users with rank change */}
+              <Card className="p-6">
+                <h3 className="font-bold mb-4">Upravljanje rangovima</h3>
+                <div className="relative mb-4">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-dark-400" />
+                  <input
+                    type="text"
+                    placeholder="Pretraži korisnika..."
+                    className="w-full bg-dark-800 border border-dark-700 rounded-lg pl-10 pr-4 py-3 focus:outline-none focus:border-purple-500"
+                  />
+                </div>
+                <div className="space-y-2">
+                  {users.slice(0, 5).map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-3 bg-dark-800 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        <Avatar size="sm">{user.nickname.charAt(0)}</Avatar>
+                        <div>
+                          <p className="font-medium text-sm">{user.nickname}</p>
+                          <p className="text-xs text-dark-400">{getRankName(user.rankLevel)} - {user.xpPoints} XP</p>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm">
+                        <ArrowUp className="w-4 h-4 mr-1" /> Promeni rang
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === 'projects' && (
+            <div className="space-y-6">
+              <Card className="overflow-hidden">
+                <div className="p-4 border-b border-dark-700 bg-gradient-to-r from-green-900/30 to-emerald-900/30">
+                  <h3 className="font-bold flex items-center gap-2">
+                    <Users className="w-5 h-5 text-green-400" />
+                    Project Leaderi - Chat
+                  </h3>
+                  <p className="text-xs text-dark-400 mt-1">Strateško planiranje i međusobna pomoć</p>
+                </div>
+                <div className="h-80 overflow-y-auto p-4 space-y-3">
+                  <div className="flex gap-3">
+                    <Avatar size="sm">P</Avatar>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="font-medium text-sm">ProjectLead1</span>
+                        <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400">PL</span>
+                        <span className="text-xs text-dark-500">10:00</span>
+                      </div>
+                      <p className="text-dark-300 text-sm">Projekt A napreduje. Potrebna pomoć sa backendom.</p>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 border-t border-dark-700">
+                  <div className="flex gap-2">
+                    <input type="text" placeholder="Napiši poruku..." className="flex-1 bg-dark-700 border border-dark-600 rounded-lg px-4 py-2 focus:outline-none focus:border-green-500" />
+                    <Button><MessageSquare className="w-4 h-4" /></Button>
+                  </div>
+                </div>
+              </Card>
+
+              {/* Projects */}
+              <Card className="p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-bold flex items-center gap-2">
+                    <Briefcase className="w-5 h-5 text-blue-400" />
+                    Projekti
+                  </h3>
+                  <Button variant="primary" size="sm">
+                    <Users className="w-4 h-4 mr-1" /> Novi Projekat
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  <div className="p-4 bg-dark-800 rounded-lg border border-dark-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">Projekt A - Web Aplikacija</span>
+                      <span className="text-xs px-2 py-0.5 rounded bg-green-500/20 text-green-400">Aktivan</span>
+                    </div>
+                    <p className="text-dark-400 text-sm mb-2">Tim od 4 osobe radi na web aplikaciji za zajednicu</p>
+                    <div className="flex items-center gap-2">
+                      <Avatar size="sm">P</Avatar>
+                      <Avatar size="sm">J</Avatar>
+                      <Avatar size="sm">M</Avatar>
+                      <span className="text-xs text-dark-500">+1 više</span>
+                    </div>
+                  </div>
+                  <div className="p-4 bg-dark-800 rounded-lg border border-dark-700">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-medium">Projekt B - Mobile App</span>
+                      <span className="text-xs px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400">U planiranju</span>
+                    </div>
+                    <p className="text-dark-400 text-sm mb-2">Mobilna aplikacija za iOS i Android</p>
+                    <div className="flex items-center gap-2">
+                      <Avatar size="sm">S</Avatar>
+                      <span className="text-xs text-dark-500">Potrebno 3 više članova</span>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            </div>
+          )}
+
+          {activeTab === 'analytics' && (
+            <div className="space-y-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-blue-500/20 rounded-lg"><Users className="w-5 h-5 text-blue-400" /></div>
+                    <div>
+                      <p className="text-2xl font-bold">{users.length}</p>
+                      <p className="text-xs text-dark-400">Ukupno korisnika</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-green-500/20 rounded-lg"><TrendingUp className="w-5 h-5 text-green-400" /></div>
+                    <div>
+                      <p className="text-2xl font-bold">+{Math.floor(users.length * 0.1)}</p>
+                      <p className="text-xs text-dark-400">Novih ovaj mesec</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-yellow-500/20 rounded-lg"><Zap className="w-5 h-5 text-yellow-400" /></div>
+                    <div>
+                      <p className="text-2xl font-bold">{users.reduce((acc, u) => acc + u.xpPoints, 0).toLocaleString()}</p>
+                      <p className="text-xs text-dark-400">Ukupno XP</p>
+                    </div>
+                  </div>
+                </Card>
+                <Card className="p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 bg-purple-500/20 rounded-lg"><Crown className="w-5 h-5 text-purple-400" /></div>
+                    <div>
+                      <p className="text-2xl font-bold">{users.filter(u => u.rankLevel >= 5).length}</p>
+                      <p className="text-xs text-dark-400">Preduzetnika</p>
+                    </div>
+                  </div>
+                </Card>
+              </div>
+
+              <Card className="p-6">
+                <h3 className="font-bold mb-4">Analitika po rangovima</h3>
+                <div className="space-y-3">
+                  {[
+                    { name: 'Vizionar', count: users.filter(u => u.rankLevel === 7).length, color: 'bg-purple-500' },
+                    { name: 'Izvrsni Direktor', count: users.filter(u => u.rankLevel === 6).length, color: 'bg-blue-500' },
+                    { name: 'Preduzetnik', count: users.filter(u => u.rankLevel === 5).length, color: 'bg-green-500' },
+                    { name: 'Kandidat', count: users.filter(u => u.rankLevel === 4).length, color: 'bg-yellow-500' },
+                    { name: 'Pripravnik', count: users.filter(u => u.rankLevel === 3).length, color: 'bg-orange-500' },
+                  ].map((rank) => (
+                    <div key={rank.name} className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${rank.color}`} />
+                      <span className="flex-1 text-sm">{rank.name}</span>
+                      <span className="font-bold">{rank.count}</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
           )}
         </div>
       </main>
