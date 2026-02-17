@@ -32,6 +32,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       lg: 'w-12 h-12 text-lg',
       xl: 'w-16 h-16 text-xl',
       '2xl': 'w-24 h-24 text-3xl',
+      '3xl': 'w-32 h-32 text-4xl',
       full: 'w-full h-full text-5xl',
     };
 

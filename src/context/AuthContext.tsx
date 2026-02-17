@@ -24,7 +24,7 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, rememberMe?: boolean) => Promise<void>;
   register: (email: string, password: string, nickname: string, fullName?: string) => Promise<void>;
   logout: () => void;
   fetchUser: () => Promise<void>;
@@ -37,40 +37,54 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Get token from localStorage
+  // Token helpers
   const getToken = () => localStorage.getItem('institut-biznis-token');
-  const setToken = (token: string) => localStorage.setItem('institut-biznis-token', token);
-  const removeToken = () => localStorage.removeItem('institut-biznis-token');
+  const setToken = (token: string, remember: boolean) => {
+    if (remember) {
+      localStorage.setItem('institut-biznis-token', token);
+    } else {
+      sessionStorage.setItem('institut-biznis-token', token);
+    }
+  };
+  const getStoredToken = (): string | null => {
+    return localStorage.getItem('institut-biznis-token') || sessionStorage.getItem('institut-biznis-token');
+  };
+  const removeToken = () => {
+    localStorage.removeItem('institut-biznis-token');
+    sessionStorage.removeItem('institut-biznis-token');
+  };
+  const getRememberMe = () => localStorage.getItem('remember-me') === 'true';
 
   // Fetch user on mount if token exists
   useEffect(() => {
-    const fetchCurrentUser = async () => {
-      const token = getToken();
+    const initAuth = async () => {
+      const token = getStoredToken();
       if (!token) {
         setIsLoading(false);
         return;
       }
 
       try {
+        // Check if token is expired
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const now = Math.floor(Date.now() / 1000);
+        
+        if (payload.exp && payload.exp < now) {
+          // Token expired
+          removeToken();
+          setIsLoading(false);
+          return;
+        }
+
         const response = await fetch('/api/auth/me', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
+          headers: { 'Authorization': `Bearer ${token}` }
         });
 
         if (response.ok) {
           const data = await response.json();
-          // Fallback: dodaj rolu iz token-a ako nije u response-u
           const userWithRole = {
             ...data.user,
-            role: data.user.role || (() => {
-              try {
-                const payload = JSON.parse(atob(token.split('.')[1]));
-                return payload.role || 'polaznik';
-              } catch (e) {
-                return 'polaznik';
-              }
-            })()
+            role: data.user.role || payload.role || 'polaznik'
           };
           setUser(userWithRole);
         } else {
@@ -84,84 +98,94 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    fetchCurrentUser();
+    initAuth();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, rememberMe: boolean = false) => {
     setIsLoading(true);
     
-    const response = await fetch('/api/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password })
-    });
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, rememberMe })
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || 'Login failed');
+      if (!response.ok) {
+        throw new Error(data.error || 'Login failed');
+      }
+
+      // Store token with remember me setting
+      setToken(data.token, rememberMe);
+      if (rememberMe) {
+        localStorage.setItem('remember-me', 'true');
+      } else {
+        localStorage.removeItem('remember-me');
+      }
+
+      // Parse token to get role
+      const payload = JSON.parse(atob(data.token.split('.')[1]));
+      const userWithRole = {
+        ...data.user,
+        role: data.user.role || payload.role || 'polaznik'
+      };
+      
+      setUser(userWithRole);
+      localStorage.setItem('institut-biznis-user', JSON.stringify(userWithRole));
+    } finally {
+      setIsLoading(false);
     }
-
-    setToken(data.token);
-    // Dodaj rolu u user object iz token-a ako nije u response-u
-    const userWithRole = {
-      ...data.user,
-      role: data.user.role || data.token ? (() => {
-        try {
-          const payload = JSON.parse(atob(data.token.split('.')[1]));
-          return payload.role || 'polaznik';
-        } catch (e) {
-          return 'polaznik';
-        }
-      })() : 'polaznik'
-    };
-    setUser(userWithRole);
-    localStorage.setItem('institut-biznis-user', JSON.stringify(userWithRole));
-    setIsLoading(false);
   };
 
   const register = async (email: string, password: string, nickname: string, fullName?: string) => {
     setIsLoading(true);
     
-    const response = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password, nickname, fullName })
-    });
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, nickname, fullName })
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error(data.error || 'Registration failed');
+      if (!response.ok) {
+        throw new Error(data.error || 'Registration failed');
+      }
+
+      setToken(data.token, true); // New users remember by default
+      localStorage.setItem('remember-me', 'true');
+
+      const payload = JSON.parse(atob(data.token.split('.')[1]));
+      const userWithRole = {
+        ...data.user,
+        role: data.user.role || payload.role || 'polaznik'
+      };
+      
+      setUser(userWithRole);
+      localStorage.setItem('institut-biznis-user', JSON.stringify(userWithRole));
+    } finally {
+      setIsLoading(false);
     }
-
-    setToken(data.token);
-    // Dodaj rolu u user object
-    const userWithRole = {
-      ...data.user,
-      role: data.user.role || 'polaznik'
-    };
-    setUser(userWithRole);
-    localStorage.setItem('institut-biznis-user', JSON.stringify(userWithRole));
-    setIsLoading(false);
   };
 
   const fetchUser = async () => {
-    const token = getToken();
+    const token = getStoredToken();
     if (!token) return;
 
     try {
       const response = await fetch('/api/auth/me', {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
 
       if (response.ok) {
         const data = await response.json();
+        const payload = JSON.parse(atob(token.split('.')[1]));
         const userWithRole = {
           ...data.user,
-          role: data.user.role || 'polaznik'
+          role: data.user.role || payload.role || 'polaznik'
         };
         setUser(userWithRole);
         localStorage.setItem('institut-biznis-user', JSON.stringify(userWithRole));
@@ -175,6 +199,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
     removeToken();
     localStorage.removeItem('institut-biznis-user');
+    localStorage.removeItem('remember-me');
   };
 
   return (
