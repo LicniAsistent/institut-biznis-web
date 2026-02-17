@@ -538,8 +538,10 @@ export function canSeeRole(viewerRole: UserRole, targetRole: UserRole): boolean 
 }
 
 // ==========================================
-// RANK LEVELS - XP bazirani rangovi
+// CRITICAL PERMISSIONS - Koje dozvole zahtevaju posebnu zaštitu
 // ==========================================
+export const CRITICAL_PERMISSIONS: Permission[] = [
+  'manage_roles_critical',
   'modify_rbac_structure',
   'assign_founder_role',
   'remove_founder_role',
